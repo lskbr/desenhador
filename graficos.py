@@ -3,10 +3,7 @@
 # https://www.nilo.pro.br
 # GitHub: https://github.com/lskbr/desenhador
 
-import os
 import socket
-import time
-import random
 
 IP_TELA = "127.0.0.1"
 PORTA_TELA = 8800
@@ -44,11 +41,12 @@ class Graficos:
     def send_comando(self, comando):
         self.s.send(comando.encode("utf-8"))
 
-    def finaliza():
+    def finaliza(self):
         self.s.close()
 
 
 if __name__ == "__main__":
+    import random
     g = Graficos()
     linhas = colunas = 32
     g.grid(False, 8)
@@ -60,4 +58,3 @@ if __name__ == "__main__":
         g.cor(random.randint(0, 255),
               random.randint(0, 255),
               random.randint(0, 255))
-        print(".", end="")

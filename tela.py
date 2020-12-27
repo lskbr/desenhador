@@ -3,14 +3,11 @@
 # https://www.nilo.pro.br
 # GitHub: https://github.com/lskbr/desenhador
 
-import os
-import sys
 import socket
-import time
 import pygame
 import select
 
-from pygame.locals import *
+from pygame.locals import MOUSEBUTTONDOWN, KEYDOWN, K_s, QUIT
 from enum import Enum
 
 #
@@ -66,7 +63,6 @@ class Servidor:
         self.modo = Modo.RETANGULO
         self.desenha_grid = True
         self.margem = 0  # Desenha os quadrados dentro do grid
-        # Programa Principal
         self.inicialize()
         self.inicialize_servidor()
         self.atualiza_grid()
@@ -76,7 +72,6 @@ class Servidor:
 
     def inicialize(self):
         pygame.init()
-        info = pygame.display.Info()
         pygame.display.set_mode((self.xtam, self.ytam), 0)
         pygame.display.set_caption("Desenho")
         self.superficie = pygame.display.get_surface()
@@ -90,7 +85,6 @@ class Servidor:
     def inicialize_servidor(self):
         self.servidor = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.servidor.bind(self.endereco)
-        # servidor.setblocking(False)
         self.servidor.settimeout(0.0)
         self.servidor.listen(self.backlog)
 
@@ -133,6 +127,7 @@ class Servidor:
                 pygame.draw.line(self.superficie, AZUL,
                                  (pedaco * self.largura, 0),
                                  (pedaco * self.largura, self.tamanho.y))
+            for pedaco in range(self.tgrade.y):
                 pygame.draw.line(self.superficie, AZUL,
                                  (0, pedaco * self.altura),
                                  (self.tamanho.y, pedaco * self.altura))
@@ -169,7 +164,6 @@ class Servidor:
             if c[0].fileno == conexao.fileno:
                 remova.append(c)
         for r in remova:
-            # print("Removendo")
             self.conexoes.remove(r)
             if conexao.fileno in self.recebido:
                 del self.recebido[conexao.fileno]
@@ -178,7 +172,6 @@ class Servidor:
         try:
             rc = [x[0] for x in self.conexoes]
             r, _, ex = select.select(rc, [], rc, 0)
-            # print([id(z) for z in r], ex)
 
             for x in ex:
                 self.remove_conexao(x)
@@ -195,14 +188,10 @@ class Servidor:
                     c = self.recebido[cc.fileno].find(b'\n')
                     if c != -1:
                         linha = self.recebido[cc.fileno][:c]
-                        # print(f"c={c} linha={linha}")
                         comando = linha[0:2]
                         parametros = linha[3:].split(b",")
-                        # print(f"Comando: {comando} Parametro: {parametros}")
                         self.processa_comando(comando, parametros)
                         self.recebido[cc.fileno] = self.recebido[cc.fileno][c + 1:]
-                        # print("tamanho do recebido: "
-                        #       f" {len(self.recebido[cc.fileno])} recebido: {self.recebido[cc.fileno]}")
                     else:
                         break
         except socket.error as erro:
@@ -233,8 +222,6 @@ class Servidor:
                 if e:
                     e = pygame.event.poll()
                     if e.type == MOUSEBUTTONDOWN:
-                        # print(self.conexoes, e.pos, e.button)
-                        # print(dir(e))
                         # self.ponto(self.tela_para_grid(e.pos), AZUL)
                         ptela = self.tela_para_grid(e.pos)
                         pygame.display.set_caption(f"Desenho: {ptela.x}, {ptela.y}")
